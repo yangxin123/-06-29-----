@@ -7,14 +7,46 @@
 //
 
 #import "AppDelegate.h"
+#import "NewfeatureViewCtr.h"
+#import "OauthViewCtr.h"
+#import "MianCtr.h"
+
+#import "AccountTool.h"
+
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
-    self.window.backgroundColor = [UIColor whiteColor];
+    
+    // 取得info.plist字典
+    NSString *version = [NSBundle mainBundle].infoDictionary[(NSString *)kCFBundleVersionKey];
+    
+    // 从沙盒取出版本号
+    NSString *saveVersion = [[NSUserDefaults standardUserDefaults] objectForKey:version];
+    
+    if ([saveVersion isEqualToString:version]) { // 同一版本
+        
+        if ([AccountTool sharedAccountTool].account) {
+            self.window.rootViewController = [[MianCtr alloc] init];
+            
+        } else {
+            self.window.rootViewController = [[OauthViewCtr alloc] init];
+        }
+        
+        
+    } else { // 不同版本
+        // 存储
+        [[NSUserDefaults standardUserDefaults] setObject:version forKey:version];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        // 显示新特性
+        self.window.rootViewController = [[NewfeatureViewCtr alloc] init];
+    }
+    
+    
+    
     [self.window makeKeyAndVisible];
     return YES;
 }
